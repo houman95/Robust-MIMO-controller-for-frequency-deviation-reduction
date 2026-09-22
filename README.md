@@ -67,21 +67,25 @@ where $D$ is a scaling matrix compatible with the uncertainty structure.
 
 The algorithm proceeds as follows:
 
-### K-step
+### 1. K-step
 
-For a fixed scaling $D$, solve the scaled $H_\infty$ problem:
+For a fixed scaling $D$, solve a scaled $H_\infty$ synthesis problem:
 
 $$
 \min_K \|D M(K)D^{-1}\|_\infty.
 $$
 
-### D-step
+### 2. D-step
 
 With the controller fixed, perform frequency-by-frequency $\mu$-analysis and compute $D(j\omega)$ scalings that tighten the upper bound on $\mu$.
 
-3. **Fit the scaling:** approximate the frequency-dependent scaling by a stable low-order transfer function so it can be included in the next synthesis step.
+### 3. Fit the scaling
 
-4. Repeat the K- and D-steps until the robust-performance bound is satisfactory.
+Approximate the frequency-dependent scaling by a stable low-order transfer function so that it can be included in the next synthesis step.
+
+### 4. Repeat
+
+Repeat the K-step and D-step until the robust-performance bound is satisfactory.
 
 In this project, the D-scalings were fitted with third-order transfer functions. Two D-K iterations were sufficient to satisfy the nominal-performance, robust-stability, and robust-performance conditions for the modeled uncertainty set.
 
@@ -203,11 +207,11 @@ $$
 
 and
 
-$
+
+$$
 W_{se}(s)
-=
-\frac{50s+0.001}{0.5s+0.1}.
-$
+=\frac{50s+0.001}{0.5s+0.1}.
+$$
 
 Together, the weighting functions penalize frequency deviation, battery usage, and excessive control action over the frequency ranges relevant to each signal.
 
@@ -215,34 +219,34 @@ Together, the weighting functions penalize frequency deviation, battery usage, a
 
 For a generalized plant $P$ and controller $K$, let
 
-$
+$$
 T_{wz}(s;K)
-$
+$$
 
 denote the closed-loop transfer matrix from exogenous inputs $w$ to weighted performance outputs $z$.
 
 The nominal $H_\infty$ synthesis problem can be written as
 
-$
+$$
 \min_{K\ \mathrm{stabilizing}}
 \left\|T_{wz}(s;K)\right\|_\infty.
-$
+$$
 
 The resulting controller is designed for the weighted nominal plant. It is then tested against the structured uncertainty using $\mu$-analysis.
 
 For a matrix $M$ and admissible uncertainty structure $\boldsymbol{\Delta}$, the structured singular value is
 
-$
+
+$$
 \mu_{\boldsymbol{\Delta}}(M)
-=
-\frac{1}
+=\frac{1}
 {\displaystyle
 \min_{\Delta\in\boldsymbol{\Delta}}
 \left\{
 \bar{\sigma}(\Delta):
 \det(I-M\Delta)=0
 \right\}},
-$
+$$
 
 with $\mu_{\boldsymbol{\Delta}}(M)=0$ if no destabilizing $\Delta$ exists.
 
@@ -287,16 +291,16 @@ where $D$ belongs to a set of scaling matrices that commute with the uncertainty
 
 For a fixed scaling $D^{(k)}$, solve a scaled $H_\infty$ problem:
 
-$
+
+$$
 K^{(k+1)}
-=
-\arg\min_K
+=\arg\min_K
 \left\|
 D^{(k)}
 M(K)
 \left(D^{(k)}\right)^{-1}
 \right\|_\infty.
-$
+$$
 
 This step finds a controller for the current approximation of the structured robust-performance objective.
 
