@@ -189,17 +189,17 @@ These weights reflect the different actuator bandwidths. The conventional genera
 
 Additional weights reported in the project are
 
-$
-W_{w2}(s)
-=
-\frac{s+5\times 10^{-4}}{s+10^{-5}},
-$
 
-$
+$$
+W_{w2}(s)
+=\frac{s+5\times 10^{-4}}{s+10^{-5}},
+$$
+
+
+$$
 W_{be}(s)
-=
-\frac{20s+100}{s+0.001},
-$
+=\frac{20s+100}{s+0.001},
+$$
 
 and
 
