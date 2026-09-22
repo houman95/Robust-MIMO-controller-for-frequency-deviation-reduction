@@ -174,19 +174,15 @@ The generalized plant uses frequency-dependent weighting functions to encode the
 
 The generator-control penalty is
 
-\[
-W_{cg}(s)
-=
-\frac{0.2s+0.1}{100s+0.1},
-\]
+$$
+W_{cg}(s) = \frac{0.2s+0.1}{100s+0.1}
+$$
 
 and the battery-control penalty is
 
-\[
-W_{cb}(s)
-=
-\frac{s+10^{-4}}{5s+1}.
-\]
+$$
+W_{cb}(s) = \frac{s+10^{-4}}{5s+1}
+$$
 
 These weights reflect the different actuator bandwidths. The conventional generator is intended to supply slower and larger power variations. The battery is intended to suppress faster transients.
 
@@ -214,7 +210,7 @@ W_{se}(s)
 
 Together, the weighting functions penalize frequency deviation, battery usage, and excessive control action over the frequency ranges relevant to each signal.
 
-## Baseline \(H_\infty\) design
+## Baseline $H_\infty$ design
 
 For a generalized plant \(P\) and controller \(K\), let
 
@@ -257,9 +253,9 @@ A standard robust-performance test is
 \left(M(j\omega)\right)<1.
 \]
 
-The \(H_\infty\) controller in this project does not satisfy the required \(\mu\)-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
+The  $H_\infty$ controller in this project does not satisfy the required \(\mu\)-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
 
-## \(\mu\)-synthesis and D-K iteration
+## μ-Synthesis and D-K Iteration
 
 The robust-controller design seeks a controller that minimizes the worst-case structured singular value,
 
