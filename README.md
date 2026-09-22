@@ -1,8 +1,7 @@
 # Robust MIMO Control for Microgrid Frequency Stabilisation
 
-This repository contains the MATLAB/Simulink files for a Robust Control course project at Sharif University of Technology.
-
-The project studies frequency regulation in an islanded microgrid with a conventional generator, a wind turbine, and battery storage. The plant is subject to load and renewable-generation disturbances, measurement noise, and structured model uncertainty. A nominal $H_\infty$ controller is first designed and tested. Since it does not satisfy the required robustness conditions, the final controller is obtained by $\mu$-synthesis using D-K iteration.
+The project develops a robust multivariable control system for frequency regulation in an islanded microgrid containing a conventional generator, a wind turbine, and battery storage. The generalized MIMO plant includes multiple disturbance, measurement, control, and performance channels. The controller jointly coordinates the slower conventional generator and the faster battery while penalizing frequency deviation, battery use, and control effort. The model also includes load and wind-power disturbances, measurement noise, and structured uncertainty in the plant dynamics.
+A nominal $H_\infty$ MIMO controller is first synthesized and evaluated through structured singular-value analysis. Since it does not satisfy the required robust-stability and robust-performance conditions, the final controller is obtained through $\mu$-synthesis using D-K iteration.
 
 **Author:** Houman Asgari
 
