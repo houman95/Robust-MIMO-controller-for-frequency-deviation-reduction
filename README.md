@@ -121,13 +121,13 @@ The project follows the robust-control framework described in:
 2. Y. Han, P. M. Young, A. Jain, and D. Zimmerle, “Robust Control for Microgrid Frequency Deviation Reduction With Attached Storage System,” *IEEE Transactions on Smart Grid*, 2014.
 3. J. C. Doyle, “Analysis of Feedback Systems with Structured Uncertainty,” 1982.
 
-$
+$$
 u =
 \begin{bmatrix}
 u_g\\
 u_{\mathrm{batt}}
 \end{bmatrix}.
-$
+$$
 
 The main regulated output is the frequency deviation $\Delta f$. Battery state of charge and control effort are also penalized in the generalized plant.
 
@@ -149,22 +149,22 @@ Two plant components are treated as uncertain:
 
 The uncertainties are represented as multiplicative SISO perturbations and collected into a block-diagonal structured uncertainty matrix
 
-$
+$$
 \Delta = \mathrm{diag}(\Delta_1,\Delta_2,\ldots).
-$
+$$
 
 The uncertain plant is connected to $\Delta$ through a linear fractional transformation (LFT). This produces the generalized interconnection used for structured singular-value analysis and $\mu$-synthesis.
 
 The disturbance channels include
 
-$
+$$
 w =
 \begin{bmatrix}
 \Delta P_{\mathrm{load}}\\
 \Delta P_{\mathrm{wind}}\\
 n
 \end{bmatrix},
-$
+$$
 
 where $n$ denotes measurement noise.
 
@@ -252,11 +252,11 @@ with $\mu_{\boldsymbol{\Delta}}(M)=0$ if no destabilizing $\Delta$ exists.
 
 A standard robust-performance test is
 
-$
+$$
 \sup_{\omega}
 \mu_{\boldsymbol{\Delta}}
 \left(M(j\omega)\right)<1.
-$
+$$
 
 The  $H_\infty$ controller in this project does not satisfy the required $\mu$-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
 
@@ -264,18 +264,18 @@ The  $H_\infty$ controller in this project does not satisfy the required $\mu$-b
 
 The robust-controller design seeks a controller that minimizes the worst-case structured singular value,
 
-$
+$$
 \min_K
 \sup_{\omega}
 \mu_{\boldsymbol{\Delta}}
 \left(M(K,j\omega)\right),
-$
+$$
 
 where $M(K,s)$ is the closed-loop interconnection seen by the structured uncertainty blocks.
 
 Direct optimization of $\mu$ with respect to $K$ is difficult. D-K iteration replaces it with alternating controller synthesis and scaling steps. The key upper bound is
 
-$
+$$
 \mu_{\boldsymbol{\Delta}}(M)
 \leq
 \inf_{D\in\mathcal{D}}
@@ -283,7 +283,7 @@ $
 \left(
 DMD^{-1}
 \right),
-$
+$$
 
 where $D$ belongs to a set of scaling matrices that commute with the uncertainty structure.
 
@@ -308,7 +308,7 @@ This step finds a controller for the current approximation of the structured rob
 
 With $K^{(k+1)}$ fixed, perform frequency-by-frequency $\mu$-analysis and compute scaling matrices that reduce the upper bound,
 
-$
+$$
 D^{(k+1)}(j\omega)
 \approx
 \arg\min_{D\in\mathcal{D}}
@@ -318,7 +318,7 @@ D
 M(K^{(k+1)},j\omega)
 D^{-1}
 \right].
-$
+$$
 
 The resulting $D(j\omega)$ is frequency dependent. To use it in the next synthesis step, the project fits the scaling response with a third-order rational transfer function.
 
@@ -344,19 +344,19 @@ At low frequencies, the conventional generator is preferred because it supplies 
 
 The frequency-dependent penalties therefore encourage a closed-loop allocation in which
 
-$
+$$
 \text{slow power imbalance}
 \longrightarrow
 \text{conventional generator},
-$
+$$
 
 while
 
-$
+$$
 \text{fast power imbalance}
 \longrightarrow
 \text{battery storage}.
-$
+$$
 
 This allocation is not imposed by switching logic. It emerges from the weighted MIMO synthesis.
 
