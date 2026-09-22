@@ -1,113 +1,346 @@
 # Robust MIMO Control for Microgrid Frequency Stabilisation
 
-MATLAB/Simulink implementation of a robust multivariable controller for frequency regulation in an islanded microgrid with battery energy storage.
+This repository contains the MATLAB/Simulink implementation of a robust MIMO controller for frequency regulation in an islanded microgrid with battery energy storage. The project was completed for a Robust Control course at the Department of Electrical Engineering, Sharif University of Technology.
 
-This repository contains the simulation files developed for a Robust Control course project at Sharif University of Technology.
+The controller coordinates a conventional diesel generator and a battery storage system in the presence of load fluctuations, wind-power variations, sensor noise, and structured plant uncertainty. A nominal \(H_\infty\) design is first evaluated. Its lack of robust stability and robust performance motivates a \(\mu\)-synthesis design based on D-K iteration.
 
-## Overview
+**Author:** Houman Asgari
 
-Islanded microgrids are sensitive to load variations and fluctuations in renewable generation because they do not benefit from the frequency support of a large utility grid. In this project, the microgrid combines:
+## Problem setting
 
-- a conventional diesel generator,
-- a wind turbine generator,
-- a battery-based storage system,
-- uncertain plant dynamics,
-- load and renewable-generation disturbances,
-- measurement noise.
+The microgrid contains three main components:
 
-The control objective is to reduce frequency deviations while coordinating the slower conventional generator with the faster battery storage system.
+- a conventional diesel generator;
+- a wind turbine generator (WTG);
+- a battery-based storage system.
 
-## Control problem
+The nominal wind-turbine power is \(350\,\mathrm{kW}\). The main model parameters used in the report are
 
-The plant is represented by a linearized MIMO model around the nominal operating point. Wind-power fluctuations and load variations are treated as disturbance inputs, while the generator and battery power commands are the control inputs.
+| Parameter | Symbol | Nominal value |
+| --- | --- | ---: |
+| Governor time constant | \(T_g\) | \(0.1\,\mathrm{s}\) |
+| Diesel-engine time constant | \(T_d\) | \(5.0\,\mathrm{s}\) |
+| Battery time constant | \(T_b\) | \(0.1\,\mathrm{s}\) |
+| Inertia constant | \(M\) | \(0.15\,\mathrm{pu\,MW\,s/Hz}\) |
+| Damping constant | \(D\) | \(0.008\,\mathrm{pu\,MW/Hz}\) |
+| Speed droop | \(R\) | \(3\,\mathrm{Hz/pu}\) |
 
-Model uncertainty is included in the diesel-generator and rotating-mass dynamics. The uncertain plant is written in a structured form suitable for robust-control analysis.
+The model is linearized around the nominal operating point. Signals are expressed as deviations from nominal values. In particular, frequency is represented by
 
-The main performance objectives are:
+\[
+\Delta f = f-f_{\mathrm{nom}},
+\qquad
+f_{\mathrm{nom}}=60\,\mathrm{Hz}.
+\]
 
-- maintain small frequency deviations,
-- preserve stability under model uncertainty,
-- attenuate load and wind-power disturbances,
-- limit excessive battery usage,
-- avoid unnecessarily large control effort.
+The principal power-deviation signals are
 
-## Method
+\[
+\Delta P_{\mathrm{load}},\qquad
+\Delta P_{\mathrm{wind}},\qquad
+\Delta P_{\mathrm{batt}},\qquad
+\Delta P_{\mathrm{gen}}.
+\]
 
-The controller design follows a structured robust-control approach.
+Load and wind-power variations are treated as external disturbances. The two control inputs are the commands applied to the conventional generator and battery,
 
-### 1. Nominal and uncertain plant model
+\[
+u =
+\begin{bmatrix}
+u_g\\
+u_{\mathrm{batt}}
+\end{bmatrix}.
+\]
 
-The microgrid model is linearized and represented in state-space form. Dynamic uncertainties are introduced through weighting functions and structured perturbation blocks.
+The main regulated output is the frequency deviation \(\Delta f\). Battery state of charge and control effort are also penalized in the generalized plant.
 
-### 2. Performance weighting
+The linearized open-loop model is obtained from the Simulink model using `linmod`. The resulting state-space realization
 
-Frequency deviation, battery state of charge, and control effort are weighted to encode the desired closed-loop behaviour.
+\[
+\dot{x}=Ax+Bu,\qquad
+y=Cx+Du
+\]
 
-The weighting strategy reflects the different roles of the actuators:
+has order 12.
 
-- the conventional generator mainly handles slower and larger load variations,
-- the battery responds to faster transients,
-- frequency deviation is strongly penalized over the relevant bandwidth.
+## Uncertainty and disturbances
 
-### 3. Baseline \(H_\infty\) design
+Two plant components are treated as uncertain:
 
-An \(H_\infty\) controller is first designed for the nominal weighted plant. Structured singular-value analysis is then used to assess robust stability and robust performance.
+- rotating-mass/load dynamics: \(50\%\) uncertainty;
+- diesel-engine dynamics: \(40\%\) uncertainty.
 
-The baseline controller does not satisfy the required robustness conditions for the full uncertainty set.
+The uncertainties are represented as multiplicative SISO perturbations and collected into a block-diagonal structured uncertainty matrix
 
-### 4. \(\mu\)-synthesis with D-K iteration
+\[
+\Delta = \operatorname{diag}(\Delta_1,\Delta_2,\ldots).
+\]
 
-A robust MIMO controller is then synthesized using D-K iteration. The procedure alternates between:
+The uncertain plant is connected to \(\Delta\) through a linear fractional transformation (LFT). This produces the generalized interconnection used for structured singular-value analysis and \(\mu\)-synthesis.
 
-1. \(\mu\)-analysis of the closed-loop system,
-2. frequency-dependent D-scaling,
-3. controller redesign using the scaled plant.
+The disturbance channels include
 
-After two D-K iterations, the resulting controller satisfies the robust-stability and robust-performance requirements for the modeled uncertainty set.
+\[
+w =
+\begin{bmatrix}
+\Delta P_{\mathrm{load}}\\
+\Delta P_{\mathrm{wind}}\\
+n
+\end{bmatrix},
+\]
 
-## Simulation study
+where \(n\) denotes measurement noise.
 
-The robust controller is evaluated under a worst-case perturbed plant with:
+The design therefore addresses two different issues:
 
-- strong load-power variations,
-- wind-generation fluctuations,
-- measurement noise,
-- simultaneous model uncertainty.
+1. **disturbance rejection**, mainly against load and renewable-generation fluctuations;
+2. **robustness to structured model uncertainty**, mainly in the diesel-generator and rotating-mass dynamics.
 
-The report compares the D-K-iteration controller with the baseline \(H_\infty\) controller.
+## Frequency-dependent performance shaping
 
-In the considered worst-case simulation, the \(H_\infty\) design exhibits a frequency drop of about **8 Hz**, whereas the robust \(\mu\)-synthesis controller keeps the peak frequency deviation to roughly **0.2 Hz**.
+The generalized plant uses frequency-dependent weighting functions to encode the desired division of control effort between the conventional generator and the battery.
 
-These simulations illustrate the advantage of explicitly accounting for structured model uncertainty during controller synthesis.
+The generator-control penalty is
 
-## Repository contents
+\[
+W_{cg}(s)
+=
+\frac{0.2s+0.1}{100s+0.1},
+\]
 
-The repository currently contains the MATLAB/Simulink files used for the course-project simulations, including the plant model, uncertainty representation, controller synthesis, and closed-loop robustness tests.
+and the battery-control penalty is
 
-The original project report describes the modelling assumptions, weighting functions, controller design procedure, and simulation results in more detail.
+\[
+W_{cb}(s)
+=
+\frac{s+10^{-4}}{5s+1}.
+\]
 
-## Software
+These weights reflect the different actuator bandwidths. The conventional generator is intended to supply slower and larger power variations. The battery is intended to suppress faster transients.
 
-The project was developed in MATLAB/Simulink and uses functionality from the Robust Control Toolbox.
+Additional weights reported in the project are
 
-Relevant methods include:
+\[
+W_{w2}(s)
+=
+\frac{s+5\times 10^{-4}}{s+10^{-5}},
+\]
 
-- state-space modelling,
-- linearization of Simulink models,
-- \(H_\infty\) control,
-- structured singular-value (\(\mu\)) analysis,
-- linear fractional transformations,
-- D-K iteration,
-- robust stability and robust performance analysis.
+\[
+W_{be}(s)
+=
+\frac{20s+100}{s+0.001},
+\]
 
-## Background
+and
 
-The project follows the robust-control framework commonly used for uncertain multivariable systems and is motivated by frequency regulation in islanded microgrids with renewable generation and battery storage.
+\[
+W_{se}(s)
+=
+\frac{50s+0.001}{0.5s+0.1}.
+\]
 
-Two key references used in the original report are:
+Together, the weighting functions penalize frequency deviation, battery usage, and excessive control action over the frequency ranges relevant to each signal.
 
-1. H. Bevrani, M. R. Feizi, and S. Ataee, “Robust Frequency Control in an Islanded Microgrid: \(H_\infty\) and \(\mu\)-Synthesis Approaches,” *IEEE Transactions on Smart Grid*, 2016.
-2. Y. Han, P. M. Young, A. Jain, and D. Zimmerle, “Robust Control for Microgrid Frequency Deviation Reduction With Attached Storage System,” *IEEE Transactions on Smart Grid*, 2014.
+## Baseline \(H_\infty\) design
+
+For a generalized plant \(P\) and controller \(K\), let
+
+\[
+T_{wz}(s;K)
+\]
+
+denote the closed-loop transfer matrix from exogenous inputs \(w\) to weighted performance outputs \(z\).
+
+The nominal \(H_\infty\) synthesis problem can be written as
+
+\[
+\min_{K\ \mathrm{stabilizing}}
+\left\|T_{wz}(s;K)\right\|_\infty.
+\]
+
+The resulting controller is designed for the weighted nominal plant. It is then tested against the structured uncertainty using \(\mu\)-analysis.
+
+For a matrix \(M\) and admissible uncertainty structure \(\boldsymbol{\Delta}\), the structured singular value is
+
+\[
+\mu_{\boldsymbol{\Delta}}(M)
+=
+\frac{1}
+{\displaystyle
+\min_{\Delta\in\boldsymbol{\Delta}}
+\left\{
+\bar{\sigma}(\Delta):
+\det(I-M\Delta)=0
+\right\}},
+\]
+
+with \(\mu_{\boldsymbol{\Delta}}(M)=0\) if no destabilizing \(\Delta\) exists.
+
+A standard robust-performance test is
+
+\[
+\sup_{\omega}
+\mu_{\boldsymbol{\Delta}}
+\left(M(j\omega)\right)<1.
+\]
+
+The \(H_\infty\) controller in this project does not satisfy the required \(\mu\)-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
+
+## \(\mu\)-synthesis and D-K iteration
+
+The robust-controller design seeks a controller that minimizes the worst-case structured singular value,
+
+\[
+\min_K
+\sup_{\omega}
+\mu_{\boldsymbol{\Delta}}
+\left(M(K,j\omega)\right),
+\]
+
+where \(M(K,s)\) is the closed-loop interconnection seen by the structured uncertainty blocks.
+
+Direct optimization of \(\mu\) with respect to \(K\) is difficult. D-K iteration replaces it with alternating controller synthesis and scaling steps. The key upper bound is
+
+\[
+\mu_{\boldsymbol{\Delta}}(M)
+\leq
+\inf_{D\in\mathcal{D}}
+\bar{\sigma}
+\left(
+DMD^{-1}
+\right),
+\]
+
+where \(D\) belongs to a set of scaling matrices that commute with the uncertainty structure.
+
+### K-step
+
+For a fixed scaling \(D^{(k)}\), solve a scaled \(H_\infty\) problem:
+
+\[
+K^{(k+1)}
+=
+\arg\min_K
+\left\|
+D^{(k)}
+M(K)
+\left(D^{(k)}\right)^{-1}
+\right\|_\infty.
+\]
+
+This step finds a controller for the current approximation of the structured robust-performance objective.
+
+### D-step
+
+With \(K^{(k+1)}\) fixed, perform frequency-by-frequency \(\mu\)-analysis and compute scaling matrices that reduce the upper bound,
+
+\[
+D^{(k+1)}(j\omega)
+\approx
+\arg\min_{D\in\mathcal{D}}
+\bar{\sigma}
+\left[
+D
+M(K^{(k+1)},j\omega)
+D^{-1}
+\right].
+\]
+
+The resulting \(D(j\omega)\) is frequency dependent. To use it in the next synthesis step, the project fits the scaling response with a third-order rational transfer function.
+
+The procedure is then repeated:
+
+1. start with the current controller or scaling;
+2. perform \(\mu\)-analysis over frequency;
+3. extract the \(D\)-scaling matrices;
+4. fit the frequency-dependent scaling with a third-order transfer function;
+5. solve the scaled \(H_\infty\) problem for a new controller;
+6. evaluate robust stability and robust performance;
+7. repeat until the \(\mu\) bound is acceptable.
+
+In the reported implementation, two D-K iterations were sufficient to satisfy the nominal-performance, robust-stability, and robust-performance conditions for the modeled uncertainty set.
+
+The final robust controller has order 12, equal to the order of the design interconnection.
+
+## Interpretation of the MIMO design
+
+The controller acts on the diesel generator and battery simultaneously.
+
+At low frequencies, the conventional generator is preferred because it supplies the bulk of the power and handles slow load variations. At higher frequencies, the battery is preferred because of its faster response.
+
+The frequency-dependent penalties therefore encourage a closed-loop allocation in which
+
+\[
+\text{slow power imbalance}
+\longrightarrow
+\text{conventional generator},
+\]
+
+while
+
+\[
+\text{fast power imbalance}
+\longrightarrow
+\text{battery storage}.
+\]
+
+This allocation is not imposed by switching logic. It emerges from the weighted MIMO synthesis.
+
+## Worst-case perturbation study
+
+The final \(\mu\)-synthesis controller is compared with the baseline \(H_\infty\) controller under a worst-case perturbed plant.
+
+The test includes:
+
+- the modeled plant uncertainties;
+- large load-power variations;
+- wind-power fluctuations;
+- Gaussian measurement noise.
+
+In the reported simulation, the baseline \(H_\infty\) controller allows the system frequency to drop by approximately
+
+\[
+8\,\mathrm{Hz},
+\]
+
+under the worst-case perturbation.
+
+With the D-K-iteration controller, the peak frequency variation remains around
+
+\[
+0.2\,\mathrm{Hz}.
+\]
+
+The \(\mu\)-analysis also verifies robust stability and robust performance for the uncertainty model used in the project.
+
+## MATLAB/Simulink implementation
+
+The repository contains the simulation and controller-design files used for the project. The implementation uses MATLAB/Simulink and the Robust Control Toolbox for tasks including
+
+- Simulink plant modelling;
+- linearization with `linmod`;
+- state-space modelling;
+- uncertain LTI models;
+- LFT interconnections;
+- \(H_\infty\) synthesis;
+- structured singular-value analysis;
+- D-scaling;
+- D-K iteration;
+- worst-case perturbation simulation.
+
+The original course report does not specify a canonical execution order or document the individual simulation filenames, so no file-by-file run sequence is imposed here.
+
+## Scope
+
+This repository is a course-project implementation and study of robust frequency control for an uncertain islanded microgrid. The contribution is the modelling, MATLAB/Simulink implementation, weighting design, controller synthesis, robustness analysis, and worst-case simulation study.
+
+The robust-control framework follows the literature cited in the original report, in particular:
+
+1. H. Bevrani, M. R. Feizi, and S. Ataee, *Robust Frequency Control in an Islanded Microgrid: \(H_\infty\) and \(\mu\)-Synthesis Approaches*, IEEE Transactions on Smart Grid, 2016.
+2. Y. Han, P. M. Young, A. Jain, and D. Zimmerle, *Robust Control for Microgrid Frequency Deviation Reduction With Attached Storage System*, IEEE Transactions on Smart Grid, 2014.
+3. J. Doyle, *Analysis of Feedback Systems with Structured Uncertainty*, 1982.
+4. S. Skogestad and I. Postlethwaite, *Multivariable Feedback Control: Analysis and Design*.
 
 ## Author
 
