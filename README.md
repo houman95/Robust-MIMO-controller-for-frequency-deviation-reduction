@@ -67,16 +67,17 @@ where $D$ is a scaling matrix compatible with the uncertainty structure.
 
 The algorithm proceeds as follows:
 
-1. **K-step:** for a fixed scaling $D$, solve a scaled $H_\infty$ synthesis problem
+### K-step
 
-   $$
-   \min_K
-   \left\|
-   D\,M(K)\,D^{-1}
-   \right\|_\infty .
-   $$
+For a fixed scaling $D$, solve the scaled $H_\infty$ problem:
 
-2. **D-step:** with the controller fixed, perform frequency-by-frequency $\mu$-analysis and compute $D(j\omega)$ scalings that tighten the upper bound on $\mu$.
+$$
+\min_K \|D M(K)D^{-1}\|_\infty.
+$$
+
+### D-step
+
+With the controller fixed, perform frequency-by-frequency $\mu$-analysis and compute $D(j\omega)$ scalings that tighten the upper bound on $\mu$.
 
 3. **Fit the scaling:** approximate the frequency-dependent scaling by a stable low-order transfer function so it can be included in the next synthesis step.
 
@@ -116,22 +117,22 @@ The project follows the robust-control framework described in:
 2. Y. Han, P. M. Young, A. Jain, and D. Zimmerle, “Robust Control for Microgrid Frequency Deviation Reduction With Attached Storage System,” *IEEE Transactions on Smart Grid*, 2014.
 3. J. C. Doyle, “Analysis of Feedback Systems with Structured Uncertainty,” 1982.
 
-\[
+$
 u =
 \begin{bmatrix}
 u_g\\
 u_{\mathrm{batt}}
 \end{bmatrix}.
-\]
+$
 
-The main regulated output is the frequency deviation \(\Delta f\). Battery state of charge and control effort are also penalized in the generalized plant.
+The main regulated output is the frequency deviation $\Delta f$. Battery state of charge and control effort are also penalized in the generalized plant.
 
 The linearized open-loop model is obtained from the Simulink model using `linmod`. The resulting state-space realization
 
-\[
+$
 \dot{x}=Ax+Bu,\qquad
 y=Cx+Du
-\]
+$
 
 has order 12.
 
@@ -139,29 +140,29 @@ has order 12.
 
 Two plant components are treated as uncertain:
 
-- rotating-mass/load dynamics: \(50\%\) uncertainty;
-- diesel-engine dynamics: \(40\%\) uncertainty.
+- rotating-mass/load dynamics: $50\%$ uncertainty;
+- diesel-engine dynamics: $40\%$ uncertainty.
 
 The uncertainties are represented as multiplicative SISO perturbations and collected into a block-diagonal structured uncertainty matrix
 
-\[
-\Delta = \operatorname{diag}(\Delta_1,\Delta_2,\ldots).
-\]
+$
+\Delta = \mathrm{diag}(\Delta_1,\Delta_2,\ldots).
+$
 
-The uncertain plant is connected to \(\Delta\) through a linear fractional transformation (LFT). This produces the generalized interconnection used for structured singular-value analysis and \(\mu\)-synthesis.
+The uncertain plant is connected to $\Delta$ through a linear fractional transformation (LFT). This produces the generalized interconnection used for structured singular-value analysis and $\mu$-synthesis.
 
 The disturbance channels include
 
-\[
+$
 w =
 \begin{bmatrix}
 \Delta P_{\mathrm{load}}\\
 \Delta P_{\mathrm{wind}}\\
 n
 \end{bmatrix},
-\]
+$
 
-where \(n\) denotes measurement noise.
+where $n$ denotes measurement noise.
 
 The design therefore addresses two different issues:
 
@@ -188,50 +189,50 @@ These weights reflect the different actuator bandwidths. The conventional genera
 
 Additional weights reported in the project are
 
-\[
+$
 W_{w2}(s)
 =
 \frac{s+5\times 10^{-4}}{s+10^{-5}},
-\]
+$
 
-\[
+$
 W_{be}(s)
 =
 \frac{20s+100}{s+0.001},
-\]
+$
 
 and
 
-\[
+$
 W_{se}(s)
 =
 \frac{50s+0.001}{0.5s+0.1}.
-\]
+$
 
 Together, the weighting functions penalize frequency deviation, battery usage, and excessive control action over the frequency ranges relevant to each signal.
 
 ## Baseline $H_\infty$ design
 
-For a generalized plant \(P\) and controller \(K\), let
+For a generalized plant $P$ and controller $K$, let
 
-\[
+$
 T_{wz}(s;K)
-\]
+$
 
-denote the closed-loop transfer matrix from exogenous inputs \(w\) to weighted performance outputs \(z\).
+denote the closed-loop transfer matrix from exogenous inputs $w$ to weighted performance outputs $z$.
 
-The nominal \(H_\infty\) synthesis problem can be written as
+The nominal $H_\infty$ synthesis problem can be written as
 
-\[
+$
 \min_{K\ \mathrm{stabilizing}}
 \left\|T_{wz}(s;K)\right\|_\infty.
-\]
+$
 
-The resulting controller is designed for the weighted nominal plant. It is then tested against the structured uncertainty using \(\mu\)-analysis.
+The resulting controller is designed for the weighted nominal plant. It is then tested against the structured uncertainty using $\mu$-analysis.
 
-For a matrix \(M\) and admissible uncertainty structure \(\boldsymbol{\Delta}\), the structured singular value is
+For a matrix $M$ and admissible uncertainty structure $\boldsymbol{\Delta}$, the structured singular value is
 
-\[
+$
 \mu_{\boldsymbol{\Delta}}(M)
 =
 \frac{1}
@@ -241,36 +242,36 @@ For a matrix \(M\) and admissible uncertainty structure \(\boldsymbol{\Delta}\),
 \bar{\sigma}(\Delta):
 \det(I-M\Delta)=0
 \right\}},
-\]
+$
 
-with \(\mu_{\boldsymbol{\Delta}}(M)=0\) if no destabilizing \(\Delta\) exists.
+with $\mu_{\boldsymbol{\Delta}}(M)=0$ if no destabilizing $\Delta$ exists.
 
 A standard robust-performance test is
 
-\[
+$
 \sup_{\omega}
 \mu_{\boldsymbol{\Delta}}
 \left(M(j\omega)\right)<1.
-\]
+$
 
-The  $H_\infty$ controller in this project does not satisfy the required \(\mu\)-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
+The  $H_\infty$ controller in this project does not satisfy the required $\mu$-based robustness condition. The analysis therefore indicates that an admissible perturbation can violate robust stability or robust performance.
 
 ## μ-Synthesis and D-K Iteration
 
 The robust-controller design seeks a controller that minimizes the worst-case structured singular value,
 
-\[
+$
 \min_K
 \sup_{\omega}
 \mu_{\boldsymbol{\Delta}}
 \left(M(K,j\omega)\right),
-\]
+$
 
-where \(M(K,s)\) is the closed-loop interconnection seen by the structured uncertainty blocks.
+where $M(K,s)$ is the closed-loop interconnection seen by the structured uncertainty blocks.
 
-Direct optimization of \(\mu\) with respect to \(K\) is difficult. D-K iteration replaces it with alternating controller synthesis and scaling steps. The key upper bound is
+Direct optimization of $\mu$ with respect to $K$ is difficult. D-K iteration replaces it with alternating controller synthesis and scaling steps. The key upper bound is
 
-\[
+$
 \mu_{\boldsymbol{\Delta}}(M)
 \leq
 \inf_{D\in\mathcal{D}}
@@ -278,15 +279,15 @@ Direct optimization of \(\mu\) with respect to \(K\) is difficult. D-K iteration
 \left(
 DMD^{-1}
 \right),
-\]
+$
 
-where \(D\) belongs to a set of scaling matrices that commute with the uncertainty structure.
+where $D$ belongs to a set of scaling matrices that commute with the uncertainty structure.
 
 ### K-step
 
-For a fixed scaling \(D^{(k)}\), solve a scaled \(H_\infty\) problem:
+For a fixed scaling $D^{(k)}$, solve a scaled $H_\infty$ problem:
 
-\[
+$
 K^{(k+1)}
 =
 \arg\min_K
@@ -295,15 +296,15 @@ D^{(k)}
 M(K)
 \left(D^{(k)}\right)^{-1}
 \right\|_\infty.
-\]
+$
 
 This step finds a controller for the current approximation of the structured robust-performance objective.
 
 ### D-step
 
-With \(K^{(k+1)}\) fixed, perform frequency-by-frequency \(\mu\)-analysis and compute scaling matrices that reduce the upper bound,
+With $K^{(k+1)}$ fixed, perform frequency-by-frequency $\mu$-analysis and compute scaling matrices that reduce the upper bound,
 
-\[
+$
 D^{(k+1)}(j\omega)
 \approx
 \arg\min_{D\in\mathcal{D}}
@@ -313,19 +314,19 @@ D
 M(K^{(k+1)},j\omega)
 D^{-1}
 \right].
-\]
+$
 
-The resulting \(D(j\omega)\) is frequency dependent. To use it in the next synthesis step, the project fits the scaling response with a third-order rational transfer function.
+The resulting $D(j\omega)$ is frequency dependent. To use it in the next synthesis step, the project fits the scaling response with a third-order rational transfer function.
 
 The procedure is then repeated:
 
 1. start with the current controller or scaling;
-2. perform \(\mu\)-analysis over frequency;
-3. extract the \(D\)-scaling matrices;
+2. perform $\mu$-analysis over frequency;
+3. extract the $D$-scaling matrices;
 4. fit the frequency-dependent scaling with a third-order transfer function;
-5. solve the scaled \(H_\infty\) problem for a new controller;
+5. solve the scaled $H_\infty$ problem for a new controller;
 6. evaluate robust stability and robust performance;
-7. repeat until the \(\mu\) bound is acceptable.
+7. repeat until the $\mu$ bound is acceptable.
 
 In the reported implementation, two D-K iterations were sufficient to satisfy the nominal-performance, robust-stability, and robust-performance conditions for the modeled uncertainty set.
 
@@ -339,25 +340,25 @@ At low frequencies, the conventional generator is preferred because it supplies 
 
 The frequency-dependent penalties therefore encourage a closed-loop allocation in which
 
-\[
+$
 \text{slow power imbalance}
 \longrightarrow
 \text{conventional generator},
-\]
+$
 
 while
 
-\[
+$
 \text{fast power imbalance}
 \longrightarrow
 \text{battery storage}.
-\]
+$
 
 This allocation is not imposed by switching logic. It emerges from the weighted MIMO synthesis.
 
 ## Worst-case perturbation study
 
-The final \(\mu\)-synthesis controller is compared with the baseline \(H_\infty\) controller under a worst-case perturbed plant.
+The final $\mu$-synthesis controller is compared with the baseline $H_\infty$ controller under a worst-case perturbed plant.
 
 The test includes:
 
@@ -366,21 +367,21 @@ The test includes:
 - wind-power fluctuations;
 - Gaussian measurement noise.
 
-In the reported simulation, the baseline \(H_\infty\) controller allows the system frequency to drop by approximately
+In the reported simulation, the baseline $H_\infty$ controller allows the system frequency to drop by approximately
 
-\[
+$
 8\,\mathrm{Hz},
-\]
+$
 
 under the worst-case perturbation.
 
 With the D-K-iteration controller, the peak frequency variation remains around
 
-\[
+$
 0.2\,\mathrm{Hz}.
-\]
+$
 
-The \(\mu\)-analysis also verifies robust stability and robust performance for the uncertainty model used in the project.
+The $\mu$-analysis also verifies robust stability and robust performance for the uncertainty model used in the project.
 
 ## MATLAB/Simulink implementation
 
@@ -391,7 +392,7 @@ The repository contains the simulation and controller-design files used for the 
 - state-space modelling;
 - uncertain LTI models;
 - LFT interconnections;
-- \(H_\infty\) synthesis;
+- $H_\infty$ synthesis;
 - structured singular-value analysis;
 - D-scaling;
 - D-K iteration;
@@ -405,7 +406,7 @@ This repository is a course-project implementation and study of robust frequency
 
 The robust-control framework follows the literature cited in the original report, in particular:
 
-1. H. Bevrani, M. R. Feizi, and S. Ataee, *Robust Frequency Control in an Islanded Microgrid: \(H_\infty\) and \(\mu\)-Synthesis Approaches*, IEEE Transactions on Smart Grid, 2016.
+1. H. Bevrani, M. R. Feizi, and S. Ataee, *Robust Frequency Control in an Islanded Microgrid: $H_\infty$ and $\mu$-Synthesis Approaches*, IEEE Transactions on Smart Grid, 2016.
 2. Y. Han, P. M. Young, A. Jain, and D. Zimmerle, *Robust Control for Microgrid Frequency Deviation Reduction With Attached Storage System*, IEEE Transactions on Smart Grid, 2014.
 3. J. Doyle, *Analysis of Feedback Systems with Structured Uncertainty*, 1982.
 4. S. Skogestad and I. Postlethwaite, *Multivariable Feedback Control: Analysis and Design*.
