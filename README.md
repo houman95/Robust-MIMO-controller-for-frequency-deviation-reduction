@@ -233,21 +233,20 @@ $$
 
 The resulting controller is designed for the weighted nominal plant. It is then tested against the structured uncertainty using $\mu$-analysis.
 
-For a matrix $M$ and admissible uncertainty structure $\boldsymbol{\Delta}$, the structured singular value is
-
+Let $\mathcal{U}$ denote the set of admissible structured perturbations. The structured singular value is
 
 $$
-\mu_{\boldsymbol{\Delta}}(M)
-=\frac{1}
-{\displaystyle
-\min_{\Delta\in\boldsymbol{\Delta}}
-\left\{
-\bar{\sigma}(\Delta):
-\det(I-M\Delta)=0
-\right\}},
+\mu_{\mathcal{U}}(M)
+=\frac{1}{
+\displaystyle
+\min_{\Delta\in\mathcal{U}:\,\det(I-M\Delta)=0}
+\bar{\sigma}(\Delta)
+}.
 $$
 
-with $\mu_{\boldsymbol{\Delta}}(M)=0$ if no destabilizing $\Delta$ exists.
+If no admissible perturbation makes $I-M\Delta$ singular, then
+$\mu_{\mathcal{U}}(M)=0$.
+
 
 A standard robust-performance test is
 
