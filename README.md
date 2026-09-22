@@ -133,10 +133,10 @@ The main regulated output is the frequency deviation $\Delta f$. Battery state o
 
 The linearized open-loop model is obtained from the Simulink model using `linmod`. The resulting state-space realization
 
-$
+$$
 \dot{x}=Ax+Bu,\qquad
 y=Cx+Du
-$
+$$
 
 has order 12.
 
